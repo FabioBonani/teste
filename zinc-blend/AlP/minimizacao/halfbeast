@@ -1,0 +1,37 @@
+#!/bin/bash -v
+#PBS -S /bin/bash
+#PBS -N AlP
+#PBS -l nodes=1:ppn=10:fast
+#PBS -l walltime=148:00:00
+#PBS -l cput=800000:00:00
+#PBS -q batch
+#PBS -o modelo.out
+#PBS -e modelo.err
+
+date
+
+### cd to directory where the job was submitted:
+cd $PBS_O_WORKDIR
+
+### determine the number of allocated processors:
+NPROCS=`wc -l < $PBS_NODEFILE`
+
+echo "----------------"
+echo "PBS job running on: `hostname`"
+echo "in directory:       `pwd`"
+echo "cpus: $NPROCS"
+echo "gpus: $GPUS"
+echo "nodefile:"
+cat $PBS_NODEFILE
+echo "----------------"
+
+ulimit -s unlimited
+
+. /opt/intel/bin/compilervars.sh intel64
+
+module load mkl/parallel_studio_xe_2016.0.047.sp1
+
+mpirun -machinefile $PBS_NODEFILE -np 10 /opt/vasp/vasp.5.4.4/bin/vasp.5.4.4_parallel_complex 
+
+date
+
